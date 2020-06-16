@@ -17,7 +17,7 @@ mkdir serveo
 
 cd serveo
 
-echo "$HOME/serveo/serveo -private_key_path=$HOME/.ssh/id_rsa -port=2222" >start.sh
+echo "/usr/bin/serveo -private_key_path=$HOME/.ssh/id_rsa -port=2222" >start.sh
 chmod 755 start.sh
 
 curl -s https://raw.githubusercontent.com/instantOS/instantSUPPORT/master/serveo.service |
