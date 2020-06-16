@@ -41,7 +41,7 @@ while ! [ -e /tmp/nosupport ]; do
 done &
 
 sudo -u support tmux new -s supportsession
-sudo -u support tmux new -s supportsession
+sudo -u support tmux attach-session -t supportsession
 removesupport
 pkill autossh
 sleep 1
