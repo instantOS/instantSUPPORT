@@ -13,9 +13,15 @@ fi
 # todo: tmux wrapper
 addsupport() {
 	if grep -q 'instantsupport' /etc/sudoers; then
-		echo "support user already existing"
+		echo "support user already set up"
 		return
 	fi
+
+	if getent passwd | grep -q '^support:'; then
+		echo "user support already existing"
+		return
+	fi
+
 	groupadd docker
 	groupadd video
 	groupadd wheel
