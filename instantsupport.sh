@@ -44,3 +44,5 @@ sudo -u support tmux new -s supportsession
 sudo -u support tmux new -s supportsession
 removesupport
 pkill autossh
+sleep 1
+rm /tmp/nosupport
