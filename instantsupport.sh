@@ -25,6 +25,7 @@ addsupport() {
 }
 
 removesupport() {
+	touch /tmp/nosupport
 	sed -i '/.*NOPASSWD/d' /etc/sudoers
 }
 
