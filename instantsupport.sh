@@ -29,7 +29,7 @@ fi
 
 addsupport
 while ! [ -e /tmp/nosupport ]; do
-	autossh -M 0 -R "${1:-8080}":localhost:22 support.paperbenni.xyz
+	autossh -M 0 -R "${1:-8080}":localhost:22 support.paperbenni.xyz -p 2222
 done
 
 sudo -u support tmux new -s supportsession
