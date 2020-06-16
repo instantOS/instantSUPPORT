@@ -1,12 +1,6 @@
 #!/bin/bash
 
-if command -v autossh && command -v tmux; then
-	echo "starting instantSUPPORT"
-else
-	echo "please install autossh and tmux"
-	exit
-fi
-
+sudo pacman -Sy --needed autossh tmux
 if ! whoami | grep -q '^root$'; then
 	echo "please run this as root"
 	exit
