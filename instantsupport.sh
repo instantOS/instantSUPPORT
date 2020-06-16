@@ -9,17 +9,17 @@ fi
 # todo: create support user
 # todo: tmux wrapper
 addsupport() {
-	if grep -q 'instantsupport' /etc/sudoers; then
+	if sudo grep -q 'instantsupport' /etc/sudoers; then
 		echo "support user already existing"
 		return
 	fi
-	useradd -m "support" -s /usr/bin/zsh -G wheel,docker,video
-	echo "support:support" | chpasswd
-	echo "support ALL=(ALL) NOPASSWD: ALL #instantsupport" >>/etc/sudoers
+	sudo useradd -m "support" -s /usr/bin/zsh -G wheel,docker,video
+	sudo echo "support:support" | chpasswd
+	sudo echo "support ALL=(ALL) NOPASSWD: ALL #instantsupport" >>/etc/sudoers
 }
 
 removesupport() {
-	sed -i '/.*NOPASSWD/d' /etc/sudoers
+	sudo sed -i '/.*NOPASSWD/d' /etc/sudoers
 }
 
 if systemctl is-active sshdsystemctl is-active sshd; then
