@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sudo pacman -Sy --needed autossh tmux
+sudo pacman -Sy --needed --noconfirm autossh tmux
 if ! whoami | grep -q '^root$'; then
 	echo "please run this as root"
 	exit
