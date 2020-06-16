@@ -27,13 +27,13 @@ if systemctl is-active sshdsystemctl is-active sshd; then
 	systemctl start sshd
 fi
 
-addsupport
+sudo addsupport
 while ! [ -e /tmp/nosupport ]; do
 	autossh -M 0 -R "${1:-8080}":localhost:22 support.paperbenni.xyz -p 2222
 	sleep 1
-done
+done &
 
 sudo -u support tmux new -s supportsession
 sudo -u support tmux new -s supportsession
-removesupport
+sudo removesupport
 pkill autossh
