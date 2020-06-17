@@ -12,10 +12,15 @@ if ! whoami | grep -q '^root$'; then
 	exit
 fi
 
-if command -v autossh && command -v tmux; then
-	echo "starting"
+if command -v pacman; then
+	if command -v autossh && command -v tmux; then
+		echo "starting"
+	else
+		sudo pacman -Sy --needed --noconfirm autossh tmux
+	fi
 else
-	sudo pacman -Sy --needed --noconfirm autossh tmux
+	echo "it is recommended to run instantSUPPOR on an arch based system. "
+	echo "you may have to manuall install autossh and tmux"
 fi
 
 # todo: create support user
