@@ -1,14 +1,16 @@
 #!/bin/bash
 
+if ! whoami | grep -q '^root$'; then
+	echo "please run this as root (with sudo)"
+	exit
+fi
+
 if command -v autossh && command -v tmux; then
 	echo "starting"
 else
 	sudo pacman -Sy --needed --noconfirm autossh tmux
-	if ! whoami | grep -q '^root$'; then
-		echo "please run this as root"
-		exit
-	fi
 fi
+
 # todo: create support user
 # todo: tmux wrapper
 addsupport() {
