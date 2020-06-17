@@ -43,19 +43,25 @@ if ! systemctl is-active sshd; then
 fi
 
 addsupport
-while ! [ -e /tmp/nosupport ]; do
-	autossh -o StrictHostKeyChecking=no -M 0 -R "${1:-8080}":localhost:22 support.paperbenni.xyz -p 2222
-	sleep 10
+
+while :; do
+	if ! [ -e /tmp/nosupport ]; then
+		autossh -o StrictHostKeyChecking=no -M 0 -R "${1:-8080}":localhost:22 support.paperbenni.xyz -p 2222
+		sleep 10
+	else
+		echo "exiting ssh"
+		rm /tmp/nosupport
+		exit
+	fi
 done &
 
 sudo -u support tmux new -s supportsession
-sudo -u support tmux attach-session -t supportsession
+# sudo -u support tmux attach-session -t supportsession
 removesupport
 
 echo "quitting instantsupport"
 while pgrep autossh; do
+	echo "deconnecting ssh"
 	pkill autossh
 	sleep 1
 done
-
-rm /tmp/nosupport
