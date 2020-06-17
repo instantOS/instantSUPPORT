@@ -56,7 +56,7 @@ while :; do
 		autossh -o StrictHostKeyChecking=no -M 0 -R "${1:-8080}":localhost:22 support.paperbenni.xyz -p 2222
 		sleep 10
 	else
-		echo "exiting ssh"
+		echo "ssh session ended"
 		rm /tmp/nosupport
 		exit
 	fi
