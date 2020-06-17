@@ -45,12 +45,17 @@ fi
 addsupport
 while ! [ -e /tmp/nosupport ]; do
 	autossh -o StrictHostKeyChecking=no -M 0 -R "${1:-8080}":localhost:22 support.paperbenni.xyz -p 2222
-	sleep 1
+	sleep 10
 done &
 
 sudo -u support tmux new -s supportsession
 sudo -u support tmux attach-session -t supportsession
 removesupport
-pkill autossh
-sleep 1
+
+echo "quitting instantsupport"
+while pgrep autossh; do
+	pkill autossh
+	sleep 1
+done
+
 rm /tmp/nosupport
