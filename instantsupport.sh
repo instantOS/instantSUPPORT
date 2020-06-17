@@ -1,5 +1,12 @@
 #!/bin/bash
 
+if [ -e /tmp/nosupport ]; then
+	echo "instantsupport might already be running. Run"
+	echo "sudo rm /tmo/nosupport"
+	echo "to force run instantsupport"
+	exit
+fi
+
 if ! whoami | grep -q '^root$'; then
 	echo "please run this as root (with sudo)"
 	exit
