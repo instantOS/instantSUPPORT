@@ -61,7 +61,7 @@ removesupport
 
 echo "quitting instantsupport"
 while pgrep autossh; do
-	echo "deconnecting ssh"
+	echo "disconnecting ssh"
 	pkill autossh
 	sleep 1
 done
