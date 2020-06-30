@@ -49,9 +49,13 @@ removesupport() {
 	sed -i '/.*NOPASSWD/d' /etc/sudoers
 }
 
-if ! systemctl is-active sshd; then
-	systemctl enable sshd
-	systemctl start sshd
+if command -v systemctl; then
+	if ! systemctl is-active sshd; then
+		systemctl enable sshd
+		systemctl start sshd
+	fi
+elif command -v rc-service; then
+	rc-service sshd start
 fi
 
 addsupport
