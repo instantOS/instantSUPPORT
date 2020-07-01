@@ -54,6 +54,11 @@ if command -v systemctl; then
 		systemctl enable sshd
 		systemctl start sshd
 	fi
+	if ! systemctl is-active NetworkManager; then
+		systemctl enable NetworkManager
+		systemctl start NetworkManager
+	fi
+
 elif command -v rc-service; then
 	rc-service sshd start
 fi
