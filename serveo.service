@@ -1,9 +1,0 @@
-[Unit]
-Description=SSH tunneling
-
-[Service]
-Type=simple
-ExecStart=/bin/bash HOME/serveo/start.sh
-
-[Install]
-WantedBy=multi-user.target

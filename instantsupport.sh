@@ -1,88 +1,133 @@
 #!/bin/bash
 
+getgrok() {
+    if ! uname -m | grep -q 'x86_64'; then
+        echo 'architecture not supported'
+        exit 1
+    fi
+
+    [ -e ~/ngrok ] || mkdir ~/ngrok
+    cd ~/ngrok || exit 1
+    if ! [ -e ./ngrok ]; then
+        wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.tgz
+        tar zxvf ./*.tgz
+        rm ./*.tgz
+    fi
+    curl -s https://pastebin.com/raw/JrhnP8ic >tokens.txt
+    ./ngrok authtoken "$(shuf tokens.txt | head -1)"
+    echo 'setting up the connection, please wait...'
+}
+
 if [ -e /tmp/nosupport ]; then
-	echo "instantsupport might already be running. Run"
-	echo "sudo rm /tmo/nosupport"
-	echo "to force run instantsupport"
-	exit
+    echo "instantsupport might already be running. Run"
+    echo "sudo rm /tmp/nosupport"
+    echo "to force run instantsupport"
+    exit
 fi
 
 if ! whoami | grep -q '^root$'; then
-	echo "please run this as root (with sudo)"
-	exit
+    echo "please run this as root (with sudo)"
+    exit
 fi
 
 if command -v pacman; then
-	if command -v autossh && command -v tmux; then
-		echo "starting"
-	else
-		sudo pacman -Sy --needed --noconfirm autossh tmux
-	fi
+    if command -v tmux; then
+        echo "starting"
+    else
+        sudo pacman -Sy --needed --noconfirm tmux
+    fi
 else
-	echo "it is recommended to run instantSUPPOR on an arch based system. "
-	echo "you may have to manuall install autossh and tmux"
+    echo "it is recommended to run instantSUPPORT on an arch based system. "
+    echo "you may have to manuall install tmux"
 fi
 
-# todo: create support user
-# todo: tmux wrapper
 addsupport() {
-	if grep -q 'instantsupport' /etc/sudoers; then
-		echo "support user already set up"
-		return
-	fi
+    if grep -q 'instantsupport' /etc/sudoers; then
+        echo "support user already set up"
+        return
+    fi
 
-	if getent passwd | grep -q '^support:'; then
-		echo "user support already existing"
-		return
-	fi
+    if getent passwd | grep -q '^instantsupport:'; then
+        echo "user support already existing"
+        return
+    fi
 
-	groupadd docker
-	groupadd video
-	groupadd wheel
-	useradd -m "support" -s /usr/bin/zsh -G wheel,docker,video
-	echo "support:support" | chpasswd
-	echo "support ALL=(ALL) NOPASSWD: ALL #instantsupport" >>/etc/sudoers
+    groupadd docker &>/dev/null
+    groupadd video &>/dev/null
+    groupadd wheel &>/dev/null
+
+    useradd -m "instantsupport" -s /usr/bin/zsh -G wheel,docker,video
+    echo "instantsupport:support" | chpasswd
+    echo "instantsupport ALL=(ALL) NOPASSWD: ALL #instantsupport" >>/etc/sudoers
 }
 
+# TODO: remove support user
 removesupport() {
-	touch /tmp/nosupport
-	sed -i '/.*NOPASSWD/d' /etc/sudoers
+    touch /tmp/nosupport
+    sed -i '/.*NOPASSWD/d' /etc/sudoers
 }
 
 if command -v systemctl; then
-	if ! systemctl is-active sshd; then
-		systemctl enable sshd
-		systemctl start sshd
-	fi
-	if ! systemctl is-active NetworkManager; then
-		systemctl enable NetworkManager
-		systemctl start NetworkManager
-	fi
+    if ! systemctl is-active sshd; then
+        systemctl enable sshd
+        systemctl start sshd
+    fi
+    if ! systemctl is-active NetworkManager; then
+        systemctl enable NetworkManager
+        systemctl start NetworkManager
+    fi
 
 elif command -v rc-service; then
-	rc-service sshd start
+    rc-service sshd start
 fi
 
 addsupport
 
 while :; do
-	if ! [ -e /tmp/nosupport ]; then
-		autossh -o StrictHostKeyChecking=no -M 0 -R "${1:-8080}":localhost:22 support.paperbenni.xyz -p 2222
-		sleep 10
-	else
-		echo "ssh session ended"
-		rm /tmp/nosupport
-		exit
-	fi
+    if ! [ -e /tmp/nosupport ]; then
+        getgrok
+        ~/ngrok/ngrok tcp 22 &>/dev/null
+        sleep 3
+        while pgrep ngrok; do
+            sleep 1
+        done
+    else
+        echo "ssh session ended"
+        pkill ngrok
+        sleep 1
+        rm /tmp/nosupport
+        exit
+    fi
 done &
 
-sudo -u support tmux new -s supportsession
+while [ -z "$NGROKURL" ]; do
+    NGROKURL="$(curl -s http://127.0.0.1:4040/api/tunnels | grep -o 'public_url":"[^"]*"' | grep -o '"[^"]*"$' | grep -o '[^"]*' | grep -o '[0-9]*$')"
+    sleep 4
+done
+echo 'NGROK url is '
+
+sudo -u instantsupport tmux new-session -s supportsession "echo '
+ _           _              _   ____  _   _ ____  ____   ___  ____ _____
+(_)_ __  ___| |_ __ _ _ __ | |_/ ___|| | | |  _ \|  _ \ / _ \|  _ \_   _|
+| |  _ \/ __| __/ _  |  _ \| __\___ \| | | | |_) | |_) | | | | |_) || |
+| | | | \__ \ || (_| | | | | |_ ___) | |_| |  __/|  __/| |_| |  _ < | |
+|_|_| |_|___/\__\__,_|_| |_|\__|____/ \___/|_|   |_|    \___/|_| \_\|_|
+
+
+your code is $NGROKURL
+
+securely send it to the person giving support
+please do not close or interact with this window
+until the support person has connected'; bash" \; \
+    split-window "echo guneter ; bash" \; \
+    select-layout even-vertical
+
 # sudo -u support tmux attach-session -t supportsession
 removesupport
 
 echo "quitting instantsupport"
-while pgrep autossh; do
-	echo "disconnecting ssh"
-	pkill autossh
-	sleep 1
+while pgrep ngrok; do
+    echo "disconnecting ssh"
+    pkill ngrok
+    sleep 1
 done
