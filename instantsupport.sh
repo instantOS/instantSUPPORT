@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 getgrok() {
     if ! uname -m | grep -q 'x86_64'; then
@@ -9,7 +9,12 @@ getgrok() {
     [ -e ~/ngrok ] || mkdir ~/ngrok
     cd ~/ngrok || exit 1
     if ! [ -e ./ngrok ]; then
-        wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.tgz
+        if command -v wget
+        then
+            wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.tgz
+        else
+            curl -O https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.tgz
+        fi
         tar zxvf ./*.tgz
         rm ./*.tgz
     fi
@@ -61,10 +66,10 @@ addsupport() {
     echo "instantsupport ALL=(ALL) NOPASSWD: ALL #instantsupport" >>/etc/sudoers
 }
 
-# TODO: remove support user
 removesupport() {
     touch /tmp/nosupport
     sed -i '/.*NOPASSWD/d' /etc/sudoers
+    userdel instantsupport
 }
 
 if command -v systemctl; then
