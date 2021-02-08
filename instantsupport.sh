@@ -12,8 +12,7 @@ getgrok() {
     [ -e ~/ngrok ] || mkdir ~/ngrok
     cd ~/ngrok || exit 1
     if ! [ -e ./ngrok ]; then
-        if command -v wget
-        then
+        if command -v wget; then
             wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.tgz
         else
             curl -O https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.tgz
@@ -24,7 +23,7 @@ getgrok() {
     curl -s https://pastebin.com/raw/Qr78VtxB >tokens.txt
     TRYTOKEN="$(shuf tokens.txt | head -1)"
     [ -e ~/.ngrok2 ] || mkdir ~/.ngrok2
-    echo "authtoken: $TRYTOKEN" > ~/.ngrok2/ngrok.yml
+    echo "authtoken: $TRYTOKEN" >~/.ngrok2/ngrok.yml
     echo 'setting up the connection, please wait...'
 }
 
@@ -74,6 +73,11 @@ addsupport() {
 removesupport() {
     touch /tmp/nosupport
     sed -i '/.*NOPASSWD/d' /etc/sudoers
+    killall -u instantsupport
+    sleep 2
+    if ps -u instantsupport; then
+        killall -u instantsupport
+    fi
     userdel instantsupport
 }
 
@@ -96,7 +100,7 @@ addsupport
 while :; do
     if ! [ -e /tmp/nosupport ]; then
         getgrok
-        ~/ngrok/ngrok tcp -region us -log stderr 22 &> /tmp/ngroklog
+        ~/ngrok/ngrok tcp -region us -log stderr 22 &>/tmp/ngroklog
         sleep 0.3
         while pgrep ngrok; do
             sleep 0.4
@@ -112,8 +116,8 @@ done &
 
 while [ -z "$NGROKURL" ]; do
     NGROKURL="$(curl -s http://127.0.0.1:4040/api/tunnels | grep -o 'public_url":"[^"]*"' | grep -o '"[^"]*"$' | grep -o '[^"]*')"
-    NGROKPORT="$(grep -o '[0-9]*$' <<< "$NGROKURL")"
-    NGROKSERVER="$(grep -o '[0-9]*.tcp.ngrok' <<< "$NGROKURL" | grep -o '[0-9]*')"
+    NGROKPORT="$(grep -o '[0-9]*$' <<<"$NGROKURL")"
+    NGROKSERVER="$(grep -o '[0-9]*.tcp.ngrok' <<<"$NGROKURL" | grep -o '[0-9]*')"
     sleep 1
 done
 
