@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# basically teamviewer but for ssh and without requiring prior installation
+# run using bash <"$(curl -Ls git.io/instantsupport)"
+
 getgrok() {
     if ! uname -m | grep -q 'x86_64'; then
         echo 'architecture not supported'
@@ -19,7 +22,9 @@ getgrok() {
         rm ./*.tgz
     fi
     curl -s https://pastebin.com/raw/Qr78VtxB >tokens.txt
-    ./ngrok authtoken "$(shuf tokens.txt | head -1)"
+    TRYTOKEN="$(shuf tokens.txt | head -1)"
+    [ -e ~/.ngrok2 ] || mkdir ~/.ngrok2
+    echo "authtoken: $TRYTOKEN" > ~/.ngrok2/ngrok.yml
     echo 'setting up the connection, please wait...'
 }
 
@@ -91,10 +96,10 @@ addsupport
 while :; do
     if ! [ -e /tmp/nosupport ]; then
         getgrok
-        ~/ngrok/ngrok tcp 22 &>/dev/null
-        sleep 3
+        ~/ngrok/ngrok tcp -region us -log stderr 22 &> /tmp/ngroklog
+        sleep 0.3
         while pgrep ngrok; do
-            sleep 1
+            sleep 0.4
         done
     else
         echo "ssh session ended"
@@ -108,10 +113,9 @@ done &
 while [ -z "$NGROKURL" ]; do
     NGROKURL="$(curl -s http://127.0.0.1:4040/api/tunnels | grep -o 'public_url":"[^"]*"' | grep -o '"[^"]*"$' | grep -o '[^"]*')"
     NGROKPORT="$(grep -o '[0-9]*$' <<< "$NGROKURL")"
-    NGROKSERVER="$(grep -o '^[0-9]*' <<< "$NGROKURL")"
-    sleep 4
+    NGROKSERVER="$(grep -o '[0-9]*.tcp.ngrok' <<< "$NGROKURL" | grep -o '[0-9]*')"
+    sleep 1
 done
-echo 'NGROK url is '
 
 sudo -u instantsupport tmux new-session -s supportsession "echo '
  _           _              _   ____  _   _ ____  ____   ___  ____ _____
@@ -121,15 +125,16 @@ sudo -u instantsupport tmux new-session -s supportsession "echo '
 |_|_| |_|___/\__\__,_|_| |_|\__|____/ \___/|_|   |_|    \___/|_| \_\|_|
 
 
-your code is $NGROKSERVER$NGROKURL
+your code is $NGROKSERVER$NGROKPORT
 
 securely send it to the person giving support
 please do not close or interact with this window
 until the support person has connected'; bash" \; \
-    split-window "echo guneter ; bash" \; \
+    split-window "echo 'shell to write stuff in' ; bash" \; \
     select-layout even-vertical
 
 # sudo -u support tmux attach-session -t supportsession
+sleep 1
 removesupport
 
 echo "quitting instantsupport"

@@ -8,3 +8,6 @@ Quickly run it on any live system
 bash <(curl -Ls git.io/instantsupport)
 ```
 
+## Planned features
+
+Termux support
