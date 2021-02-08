@@ -18,7 +18,7 @@ getgrok() {
         tar zxvf ./*.tgz
         rm ./*.tgz
     fi
-    curl -s https://pastebin.com/raw/JrhnP8ic >tokens.txt
+    curl -s https://pastebin.com/raw/Qr78VtxB >tokens.txt
     ./ngrok authtoken "$(shuf tokens.txt | head -1)"
     echo 'setting up the connection, please wait...'
 }
@@ -106,7 +106,9 @@ while :; do
 done &
 
 while [ -z "$NGROKURL" ]; do
-    NGROKURL="$(curl -s http://127.0.0.1:4040/api/tunnels | grep -o 'public_url":"[^"]*"' | grep -o '"[^"]*"$' | grep -o '[^"]*' | grep -o '[0-9]*$')"
+    NGROKURL="$(curl -s http://127.0.0.1:4040/api/tunnels | grep -o 'public_url":"[^"]*"' | grep -o '"[^"]*"$' | grep -o '[^"]*')"
+    NGROKPORT="$(grep -o '[0-9]*$' <<< "$NGROKURL")"
+    NGROKSERVER="$(grep -o '^[0-9]*' <<< "$NGROKURL")"
     sleep 4
 done
 echo 'NGROK url is '
@@ -119,7 +121,7 @@ sudo -u instantsupport tmux new-session -s supportsession "echo '
 |_|_| |_|___/\__\__,_|_| |_|\__|____/ \___/|_|   |_|    \___/|_| \_\|_|
 
 
-your code is $NGROKURL
+your code is $NGROKSERVER$NGROKURL
 
 securely send it to the person giving support
 please do not close or interact with this window
