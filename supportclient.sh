@@ -13,4 +13,4 @@ fi
 SERVERNUMBER="$(grep -o '^.' <<< "$PASSCODE")"
 SERVERPORT="$(sed 's/^.//g' <<< "$PASSCODE")"
 
-ssh instantsupport@"$SERVERNUMBER".tcp.ngrok.io -p "$SERVERPORT"
+sshpass -p support ssh -o StrictHostKeyChecking=no instantsupport@"$SERVERNUMBER".tcp.ngrok.io -p "$SERVERPORT" -t "tmux attach-session -t supportsession"
