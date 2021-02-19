@@ -36,7 +36,7 @@ fi
 
 if ! whoami | grep -q '^root$'; then
     echo "switching to root"
-    sudo bash <(curl -Ls git.io/instantsupport)
+    sudo bash -c 'bash <(curl -Ls git.io/instantsupport)'
     exit
 fi
 
