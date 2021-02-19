@@ -35,7 +35,8 @@ if [ -e /tmp/nosupport ]; then
 fi
 
 if ! whoami | grep -q '^root$'; then
-    echo "please run this as root (with sudo)"
+    echo "switching to root"
+    sudo bash <(curl -Ls git.io/instantsupport)
     exit
 fi
 
