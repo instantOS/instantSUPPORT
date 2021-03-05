@@ -27,30 +27,6 @@ getgrok() {
     echo 'setting up the connection, please wait...'
 }
 
-if [ -e /tmp/nosupport ]; then
-    echo "instantsupport might already be running. Run"
-    echo "sudo rm /tmp/nosupport"
-    echo "to force run instantsupport"
-    exit
-fi
-
-if ! whoami | grep -q '^root$'; then
-    echo "switching to root"
-    sudo bash -c 'bash <(curl -Ls git.io/instantsupport)'
-    exit
-fi
-
-if command -v pacman; then
-    if command -v tmux; then
-        echo "starting"
-    else
-        sudo pacman -Sy --needed --noconfirm tmux
-    fi
-else
-    echo "it is recommended to run instantSUPPORT on an arch based system. "
-    echo "you may have to manuall install tmux"
-fi
-
 addsupport() {
     if grep -q 'instantsupport' /etc/sudoers; then
         echo "support user already set up"
@@ -72,6 +48,7 @@ addsupport() {
 }
 
 removesupport() {
+    echo "cleaning up instantsupport leftovers"
     touch /tmp/nosupport
     sed -i '/.*NOPASSWD/d' /etc/sudoers
     killall -u instantsupport
@@ -81,6 +58,39 @@ removesupport() {
     fi
     userdel instantsupport
 }
+
+if ! whoami | grep -q '^root$'; then
+    echo "switching to root"
+    sudo bash -c 'bash <(curl -Ls git.io/instantsupport)'
+    exit
+fi
+
+if [ -n "$1" ]; then
+    case $1 in
+    -c)
+        removesupport
+        ;;
+    esac
+
+else
+    if [ -e /tmp/nosupport ]; then
+        echo "instantsupport might already be running. Run"
+        echo "sudo rm /tmp/nosupport"
+        echo "to force run instantsupport"
+        exit
+    fi
+fi
+
+if command -v pacman; then
+    if command -v tmux; then
+        echo "starting"
+    else
+        sudo pacman -Sy --needed --noconfirm tmux
+    fi
+else
+    echo "it is recommended to run instantSUPPORT on an arch based system. "
+    echo "you may have to manuall install tmux"
+fi
 
 if command -v systemctl; then
     if ! systemctl is-active sshd; then
