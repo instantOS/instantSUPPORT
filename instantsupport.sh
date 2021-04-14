@@ -61,7 +61,11 @@ removesupport() {
 
 if ! whoami | grep -q '^root$'; then
     echo "switching to root"
-    sudo bash -c 'bash <(curl -Ls git.io/instantsupport)'
+    if command -v instantsupport; then
+        sudo instantsupport "$@"
+    else
+        sudo bash -c 'bash <(curl -Ls git.io/instantsupport)'
+    fi
     exit
 fi
 
@@ -69,9 +73,13 @@ if [ -n "$1" ]; then
     case $1 in
     -c)
         removesupport
+        exit
+        ;;
+    -h)
+        echo 'usage: instantsupport [-c]'
+        exit
         ;;
     esac
-
 else
     if [ -e /tmp/nosupport ]; then
         echo "instantsupport might already be running. Run"
