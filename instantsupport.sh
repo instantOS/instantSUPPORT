@@ -69,6 +69,13 @@ if ! whoami | grep -q '^root$'; then
     exit
 fi
 
+echousage() {
+    echo 'usage: instantsupport [option]
+    -c   remove leftover files like user and permissions
+         HIGHLY RECOMMENDED AFTER REBOOTING DURING A SUPPORT SESSION'
+    exit
+}
+
 if [ -n "$1" ]; then
     case $1 in
     -c)
@@ -76,8 +83,10 @@ if [ -n "$1" ]; then
         exit
         ;;
     -h)
-        echo 'usage: instantsupport [-c]'
-        exit
+        echousage
+        ;;
+    --help)
+        echousage
         ;;
     esac
 else
